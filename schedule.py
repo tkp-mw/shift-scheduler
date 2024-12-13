@@ -61,6 +61,16 @@ if "table" in st.session_state:
     st.markdown("### スケジュールテーブル")
     st.dataframe(table)
 
+    # 勤務タイプの集計
+    def calculate_shift_counts(df, employees):
+        shift_summary = {}
+        for col in df.columns[3:]:  # 従業員列のみ
+            if col.strip():
+                shift_summary[col] = df[col].value_counts().to_dict()
+        return shift_summary
+
+    shift_counts = calculate_shift_counts(table, employee_names)
+
     # スタイル付きテーブルをHTMLで表示
     st.markdown("### 印刷用スケジュール (スクリーンショット用表示)")
 
@@ -123,5 +133,12 @@ if "table" in st.session_state:
 
     # HTMLを表示
     html_table = generate_html_table(styled_table)
-    st.components.v1.html(html_table, height=600, scrolling=True)
+    st.components.v1.html(html_table, height=1000, scrolling=True)
+
+    # 勤務タイプ集計結果を表示
+    st.markdown("### 勤務タイプ集計結果")
+    for employee, shifts in shift_counts.items():
+        st.markdown(f"#### {employee}")
+        for shift, count in shifts.items():
+            st.write(f"{shift}: {count} 回")
 
